@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import shutil
+import tempfile
 from datetime import datetime, timedelta
 from services.auth import login
 from services.reports_processos import gerar_relatorio
@@ -47,6 +48,9 @@ def main():
         pasta_downloads = os.path.join(os.getcwd(), "downloads")
         os.makedirs(pasta_downloads, exist_ok=True)
 
+        # cria diretório temporário
+        profile_path = tempfile.mkdtemp()
+
         chrome_options = Options()
         prefs = {
             "download.default_directory": pasta_downloads,
@@ -55,8 +59,10 @@ def main():
             "safebrowsing.enabled": True,
         }
         chrome_options.add_experimental_option("prefs", prefs)
+        # em vez de incognito, usamos perfil temporário
+        chrome_options.add_argument(f"--user-data-dir={profile_path}")
         chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument("--incognito")  # 🚀 abre o Chrome no modo anônimo
+        # chrome_options.add_argument("--incognito")  # 🚀 abre o Chrome no modo anônimo
 
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
