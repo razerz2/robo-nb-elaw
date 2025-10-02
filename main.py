@@ -56,6 +56,7 @@ def main():
         }
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--incognito")  # 🚀 abre o Chrome no modo anônimo
 
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
