@@ -50,24 +50,31 @@ def dentro_horario():
 
 def esperar_download(pasta_downloads, nome_final, timeout=120):
     """
-    Aguarda o arquivo terminar o download na pasta especificada e renomeia para 'nome_final'.
+    Aguarda o download terminar e renomeia o arquivo para nome_final.
+    Se já existir um arquivo com esse nome, ele será sobrescrito.
     """
     tempo_inicial = time.time()
-    arquivo_baixado = None
+    arquivo_final = os.path.join(pasta_downloads, nome_final)
 
-    while time.time() - tempo_inicial < timeout:
-        arquivos = os.listdir(pasta_downloads)
-        for arquivo in arquivos:
-            if arquivo.endswith(".tmp"):
-                # Ainda baixando
-                continue
-            if arquivo != nome_final:  
-                # encontramos o arquivo baixado
-                caminho_antigo = os.path.join(pasta_downloads, arquivo)
-                caminho_novo = os.path.join(pasta_downloads, nome_final)
-                os.rename(caminho_antigo, caminho_novo)
-                print(f"✅ Download concluído e renomeado para: {nome_final}")
-                return caminho_novo
-        time.sleep(2)
+    while True:
+        # procura arquivos baixados
+        arquivos = [f for f in os.listdir(pasta_downloads) if f.endswith(".crdownload") or f.endswith(".tmp")]
+        if not arquivos:
+            # pega o último arquivo baixado
+            arquivos = [f for f in os.listdir(pasta_downloads)]
+            if arquivos:
+                ultimo = max([os.path.join(pasta_downloads, f) for f in arquivos], key=os.path.getctime)
 
-    raise TimeoutError("⏰ Tempo esgotado esperando o download finalizar.")
+                # se já existir o arquivo final, apaga
+                if os.path.exists(arquivo_final):
+                    os.remove(arquivo_final)
+
+                # renomeia o último baixado para o nome final
+                os.rename(ultimo, arquivo_final)
+                print(f"✅ Download finalizado e salvo como: {arquivo_final}")
+                return arquivo_final
+
+        if time.time() - tempo_inicial > timeout:
+            raise TimeoutError("⏳ Tempo limite atingido esperando download terminar...")
+
+        time.sleep(1)
