@@ -2,12 +2,13 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from config import INTERVALO_BAIXAR
+from services.utils import esperar_download
+from config import INTERVALO_BAIXAR, NOME_ARQUIVO
 
 def baixar_relatorio(driver, relatorio_id, pasta_downloads="downloads"):
     """
     Acessa 'Meus relatórios', pesquisa e baixa o relatório pelo ID fornecido.
-    Caso o arquivo ainda não esteja pronto, refaz TODO o processo a cada 5 minutos.
+    Caso o arquivo ainda não esteja pronto, refaz TODO o processo a cada X minutos.
     """
     wait = WebDriverWait(driver, 30)
 
@@ -61,16 +62,22 @@ def baixar_relatorio(driver, relatorio_id, pasta_downloads="downloads"):
                 link_download = alvo.find_element(By.CSS_SELECTOR, "td:nth-child(3) a")
                 driver.execute_script("arguments[0].click();", link_download)
                 print(f"📥 Download iniciado para relatório ID {relatorio_id}")
-                break  # Sai do loop porque o download foi iniciado
+
+                # Esperar e renomear o arquivo
+                esperar_download(pasta_downloads, NOME_ARQUIVO)
+                break  # Sai do loop porque o download foi feito
+
             except Exception:
-                print(f"⏳ Relatório {relatorio_id} ainda não está pronto. Refazendo processo de download em {INTERVALO_BAIXAR} minutos...")
-                time.sleep(INTERVALO_BAIXAR*60)  # espera alguns minutos antes de repetir tudo
+                print(
+                    f"⏳ Relatório {relatorio_id} ainda não está pronto. "
+                    f"Refazendo processo de download em {INTERVALO_BAIXAR} minutos..."
+                )
+                time.sleep(INTERVALO_BAIXAR * 60)  # espera alguns minutos antes de repetir tudo
 
         except Exception as e:
             print(f"⚠️ Erro durante a tentativa de baixar relatório: {e}")
             print(f"⏳ Repetindo todo o processo em {INTERVALO_BAIXAR} minutos...")
-            time.sleep(INTERVALO_BAIXAR*60)
+            time.sleep(INTERVALO_BAIXAR * 60)
 
-    # 7) Aguardar alguns segundos para o download completar
-    time.sleep(5)
-    print("✅ Download solicitado com sucesso.")
+    # 7) Download finalizado
+    print("✅ Download solicitado e concluído com sucesso.")

@@ -11,6 +11,9 @@ PASSWORD = os.getenv("EPASS")
 URL_INICIAL = "https://sicredi.elaw.com.br/processoView.elaw"
 URL_LOGOUT = "https://sicredi.elaw.com.br/logout"
 
+# Nome Arquivo
+NOME_ARQUIVO = "relatorio_recebimentos.xlsx"
+
 #Intervalo de Execução
 INTERVALO_EXECUCAO = 60
 INTERVALO_BAIXAR = 5
